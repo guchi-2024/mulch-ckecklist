@@ -62,7 +62,7 @@ export default function AppLayout() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h4" noWrap component="div" fontWeight="fontWeightBold">
             チェックリスト
           </Typography>
         </Toolbar>
