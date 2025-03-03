@@ -1,11 +1,14 @@
+import React from 'react'
 
-
-const A350 = () => {
-  return (
-    <div>
-      A350
-    </div>
-  )
+interface A350PositionTypus{
+  text: string,
+  path: string
 }
 
-export default A350
+export const A350Position: A350PositionTypus[]= [
+   //path: "/CheckListLayout"は、仮のものでありpathの行き先が決定しだい要変更 
+   {text: "FWD", path: "/CheckListLayout"},
+   {text: "MID", path: "/CheckListLayout"},
+   {text: "AFT", path: "/CheckListLayout"},  
+]
+

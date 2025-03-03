@@ -33,7 +33,7 @@ const SideBar = (
 
   const MenuItems: menuItem[] = [
     { text: "Home", path: "/" }, 
-    { text: "A350", path:"/A350" },
+    { text: "A350", path:"/CheckListLayout" },
   ]
 
   const baseLinkStyle: CSSProperties = {
@@ -65,28 +65,13 @@ const SideBar = (
           >
             <ListItem key={index} disablePadding>
               <ListItemButton>
-                <ListItemIcon>
-                  {/* {index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
-                </ListItemIcon>
                 <ListItemText primary={item.text} />
               </ListItemButton>
             </ListItem>
           </NavLink>
         ))}
       </List>
-      <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {/* {index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      
     </div>
   );
   return (
