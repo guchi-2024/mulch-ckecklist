@@ -1,28 +1,22 @@
 import { Grid } from '@material-ui/core'
 import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material'
-import { blueGrey, grey, red } from '@mui/material/colors'
+import { blueGrey, grey } from '@mui/material/colors'
 import React, { CSSProperties } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import CheckboxList from '../common/CheckboxList'
 // import {shipText} from '../../pages/Home'
 
-
-interface positionItem {
+interface menuItem {
   text: string,
-  path: string
+  path: string,
+  areaBtn: string[]
 }
 
 
 const CheckListLayout: React.FC = () => {
 
   const location = useLocation();
-  const result =location.state
-  
-  const PositionItems: positionItem[] = [
-    //path: "/CheckListLayout"は、仮のものでありpathの行き先が決定しだい要変更 
-    {text: "FWD", path: "/CheckListLayout"},
-    {text: "MID", path: "/CheckListLayout"},
-    {text: "AFT", path: "/CheckListLayout"},
-  ]
+  const ship = location.state as menuItem
 
   const baseLinkStyle: CSSProperties = {
     textDecoration: "none",
@@ -32,13 +26,18 @@ const CheckListLayout: React.FC = () => {
 
   return (
     <Grid container>
+      {/* 左サイドバー */}
       <Grid item xs={2}>
-        <Box bgcolor="#37474f" sx={{minHeight: "100vh"}}>
+        <Box 
+          bgcolor="#37474f" 
+          sx={{
+            minHeight: "100vh"
+          }}>
           <List>
-            { PositionItems.map((item, index) => (
+            { ship.areaBtn.map((area, index) => (
               <NavLink
                 key={index}
-                to={item.path}
+                to={ship.path}
                 style={() => {
                   return {
                     ...baseLinkStyle,
@@ -63,7 +62,7 @@ const CheckListLayout: React.FC = () => {
                             fontWeight: 'bold',
                           }}
                         >
-                         {item.text}
+                         {area}
                        </Typography>
                       
                         } />
@@ -75,12 +74,17 @@ const CheckListLayout: React.FC = () => {
         </Box>
         
       </Grid>
+      {/* メイン */}
       <Grid item xs={10}>
-        <Box sx={{
-          minHeight: "100vh",
+        <Box 
+          sx={{
+            minHeight: "100vh",
+            borderLeft: 3,
+            borderColor: grey[900],
+            p: 3
           }}
         >
-        {result? <p>{result}</p>:<p>結果なし</p>}
+        <CheckboxList />
         </Box>
       </Grid>
     </Grid>

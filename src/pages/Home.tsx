@@ -1,61 +1,61 @@
 
 import { red } from '@mui/material/colors';
-import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { CSSProperties, useState } from "react";
-import ShipSelectClick from '../components/ShipSelectClick';
-
+import { Box, List, ListItemButton } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 interface menuItem {
   text: string,
-  path: string 
+  path: string,
+  areaBtn: string[]
 }
-
-const baseLinkStyle: CSSProperties = {
-  textDecoration: "none",
-  color: "inherit",
-  display: "block",
-  width: "30vw",
-}
-
-// const activeLinkStyle = {
-//   backgroundColor: "rgba(255, 0, 0, 0.5)"
-// }
-
 
 export default function Home() {
 
   const navigate = useNavigate();
 
   const MenuItems: menuItem[] = [
-    { text: "A350", path:"/CheckListLayout" },
-    { text: "E170", path:"/CheckListLayout" },
-    { text: "ATR", path:"/CheckListLayout" },
+    { text: "A350", 
+      path:"/CheckListLayout",
+      areaBtn: [ "FWD", "MID", "AFT"] 
+    },
+    { text: "E170", 
+      path:"/CheckListLayout",
+      areaBtn: [ "FWD", "AFT"] 
+    },
+    { text: "ATR", 
+      path:"/CheckListLayout",
+      areaBtn: [ "ALL" ] 
+    },
   ];
 
-  const handleLinkClick = (path: string, state: any) => {
-    navigate(path, {state})
+  const handleLinkClick = (ship: menuItem) => {
+    navigate(ship.path, {state: ship})
   }
-
-  
 
   const selectShip = (
     <div>
 
       <List>
-        { MenuItems.map((item, index) => (
+        { MenuItems.map((ship, index) => (
           <div
             key={index} 
-            onClick={() => handleLinkClick(item.path, item.text)}
-            // style={() => {
-            //   return {
-            //     ...baseLinkStyle,
-            //   }
-            // }}
+            onClick={() => handleLinkClick(ship)}
           >
-            <ListItem key={index}  sx={{m: 3, ml: 0}}>
-             <ShipSelectClick text={item.text}/>
-            </ListItem>
+            <ListItemButton
+              sx={{
+                fontSize: 25,
+                fontWeight: "fontWeightBold",
+                bgcolor: red[200], 
+                "&:hover": {bgcolor: red[500]},
+                height: 50,
+                width: 200,
+                borderRadius: "3%",
+                m: 3,
+                ml: 5
+              }}
+            >
+              {ship.text}
+            </ListItemButton>
           </div>
         ))}
       </List>
