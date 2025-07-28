@@ -8,13 +8,37 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { Outlet } from 'react-router-dom';
 import SideBar from '../common/SideBar';
+import { blue, grey, yellow} from '@mui/material/colors';
 
 const drawerWidth = 240;
 
-export default function AppLayout() {
+interface AppLayoutProps {
+  setIsSetting: React.Dispatch<React.SetStateAction<boolean>>;
+  isSetting: boolean;
+  isAdd: boolean;
+  setIsAdd: React.Dispatch<React.SetStateAction<boolean>>;
+  isDelete: boolean;
+  setIsDelete: React.Dispatch<React.SetStateAction<boolean>>;
+  isEdit: boolean;
+  setIsEdit: React.Dispatch<React.SetStateAction<boolean>>;
+  currentDateTimeFormatted: string;
+}
+
+export default function AppLayout({
+  isSetting, 
+  setIsSetting,
+  isAdd,
+  setIsAdd,
+  isDelete,
+  setIsDelete,
+  isEdit,
+  setIsEdit,
+  currentDateTimeFormatted,
+}: AppLayoutProps) {
+
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
-
+  
   const handleDrawerClose = () => {
     setIsClosing(true);
     setMobileOpen(false);
@@ -30,16 +54,15 @@ export default function AppLayout() {
     }
   };
 
-  
+
 
  
-
   return (
     <Box sx={{ 
       display: 'flex',
       bgcolor: (theme) => theme.palette.grey[800],
       color: (theme) => theme.palette.grey[100],
-      minHeight: "100vh" 
+      minHeight: "100vh", 
       }} >
       <CssBaseline />
       {/* ヘッダー */}
@@ -58,12 +81,26 @@ export default function AppLayout() {
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ mr: 2, display: { sm: 'none' }, color: blue[300] }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h4" noWrap component="div" fontWeight="fontWeightBold">
-            チェックリスト
+          <Typography 
+            variant="h4" 
+            noWrap 
+            component="div" 
+            fontWeight="fontWeightBold"
+            sx={{color: isSetting ? yellow[300] : grey[100]}}
+          >
+            {isSetting ?  "設定モード": "チェックリスト" }
+          </Typography>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ml: 'auto', color: grey[100]}}
+          >
+            {currentDateTimeFormatted}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -73,8 +110,15 @@ export default function AppLayout() {
         mobileOpen = {mobileOpen}
         handleDrawerClose = {handleDrawerClose}
         handleDrawerTransitionEnd = {handleDrawerTransitionEnd}
-
-
+        setIsSetting = {setIsSetting}
+        isSetting = {isSetting}
+        isAdd={isAdd}
+        setIsAdd={setIsAdd}
+        isDelete={isDelete}
+        setIsDelete={setIsDelete}
+        isEdit={isEdit}
+        setIsEdit={setIsEdit}
+        setMobileOpen={setMobileOpen}
       />
       {/* メインコンテンツ */}
       <Box

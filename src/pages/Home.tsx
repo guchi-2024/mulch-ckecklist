@@ -1,34 +1,33 @@
 
-import { red } from '@mui/material/colors';
+import { red, yellow, grey} from '@mui/material/colors';
 import { Box, List, ListItemButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { MenuItem } from '../types';
 
-interface menuItem {
-  text: string,
-  path: string,
-  areaBtn: string[]
+interface HomeProps {
+  isSetting: boolean;
 }
 
-export default function Home() {
+export default function Home({isSetting}: HomeProps) {
 
   const navigate = useNavigate();
 
-  const MenuItems: menuItem[] = [
+  const menuItems: MenuItem[] = [
     { text: "A350", 
-      path:"/CheckListLayout",
+      path:"/CheckListLayout/A350",
       areaBtn: [ "FWD", "MID", "AFT"] 
     },
     { text: "E170", 
-      path:"/CheckListLayout",
+      path:"/CheckListLayout/E170",
       areaBtn: [ "FWD", "AFT"] 
     },
     { text: "ATR", 
-      path:"/CheckListLayout",
+      path:"/CheckListLayout/ATR",
       areaBtn: [ "ALL" ] 
     },
   ];
 
-  const handleLinkClick = (ship: menuItem) => {
+  const handleLinkClick = (ship: MenuItem) => {
     navigate(ship.path, {state: ship})
   }
 
@@ -36,7 +35,7 @@ export default function Home() {
     <div>
 
       <List>
-        { MenuItems.map((ship, index) => (
+        { menuItems.map((ship, index) => (
           <div
             key={index} 
             onClick={() => handleLinkClick(ship)}
@@ -45,8 +44,9 @@ export default function Home() {
               sx={{
                 fontSize: 25,
                 fontWeight: "fontWeightBold",
-                bgcolor: red[200], 
-                "&:hover": {bgcolor: red[500]},
+                color: isSetting? grey[600] : grey[100],
+                bgcolor: isSetting? yellow[200] : red[200], 
+                "&:hover": {bgcolor: isSetting? yellow[600] : red[500]},
                 height: 50,
                 width: 200,
                 borderRadius: "3%",

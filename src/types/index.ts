@@ -1,4 +1,4 @@
-export interface ListItem {
+export interface ListItems {
   id: string,
   ship: string,
   area: string,
@@ -7,4 +7,11 @@ export interface ListItem {
   number: number,
   startDate: string,
   endDate: string
-} 
+}
+
+export interface MenuItem {
+  text: string,
+  path: string,
+  areaBtn: string[]
+}
+
