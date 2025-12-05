@@ -3,10 +3,10 @@ import AppBar from '@mui/material/AppBar';
 import { Box, IconButton, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { blue, blueGrey, grey, yellow } from '@mui/material/colors';
-import { CSSProperties, useMemo, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useState } from 'react';
 import { NavLink,useLocation } from 'react-router-dom';
 import CheckboxList from '../common/CheckboxList';
-import { ListItems, MenuItem } from '../../types';
+import { ListItems, MenuList, TransferRecord } from '../../types';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { addItemSchemaTs, addPositionSchemaTs, editItemSchemaTs, editPositionSchemaTs } from '../../validations/schema';
 import { AreaCheckStatus } from '../../App';
@@ -36,8 +36,14 @@ interface CheckListLayoutProps {
   setTargetPositionToDelete: React.Dispatch<React.SetStateAction<string | null>>
   currentDateTimeFormatted: string;
   areaCheckStatus: AreaCheckStatus;
-  checkedItems: string[]; 
-  onToggleItem: (itemId: string) => void; 
+  checkedItems: { [arr: string]: string[] }
+  onToggleItem: (itemId: string, arr: string) => void;
+  currentARR: string | null;
+  setCurrentARR: React.Dispatch<React.SetStateAction<string | null>>;
+  completedARRs: string[];
+  setCompletedARRs: React.Dispatch<React.SetStateAction<string[]>>;
+  transferRecordDatas: TransferRecord[];
+  setTransferRecordDatas: React.Dispatch<React.SetStateAction<TransferRecord[]>>;
  }
 
 
@@ -67,6 +73,12 @@ const CheckListLayout = ({
   areaCheckStatus,
   checkedItems,
   onToggleItem,
+  currentARR,
+  setCurrentARR,
+  completedARRs,
+  setCompletedARRs,
+  transferRecordDatas,
+  setTransferRecordDatas,
 }: CheckListLayoutProps) => {
 
   const [open, setOpen] = useState(false);
@@ -74,7 +86,15 @@ const CheckListLayout = ({
   const [areaName, setAreaName] = useState("");
 
   const location = useLocation();
-  const ship = location.state as MenuItem
+  const ship = location.state as MenuList
+
+  // コンポーネントがマウントされたとき、またはshipが変更されたときにcurrentARRを設定
+  useEffect(() => {
+    if (ship && ship.ARR) {
+      setCurrentARR(ship.ARR);
+    }
+  }, [ship]);
+
 
   console.log("ship:", ship);
 
@@ -83,11 +103,11 @@ const CheckListLayout = ({
     color: "inherit",
     display: "block",
   }
-  // menuItemsから選択されたshipのtext(機種名)とlistItemsのship(機種名)が一致したものをフィルター
+  // menuListsから選択されたshipのtext(機種名)とlistItemsのship(機種名)が一致したものをフィルター
   // listItems または ship が変更された時のみフィルタリングを行う
   const currentListItems = useMemo(() => {
     const filteredList = listItems.filter((name) => {
-      return name.ship === ship.text;
+      return name.ship === ship.shipName;
     });
     console.log("filteredList:", filteredList); // フィルタリング時のみログ出力
     return filteredList;
@@ -99,12 +119,45 @@ const CheckListLayout = ({
   // dialogの開閉
   const addAreaFormOpen = (area: string) => {
     setOpen(true);
-    setShipName(ship.text);
+    setShipName(ship.shipName);
     setAreaName(area);
     console.log("area:", area );
-    setSettingFormShip(ship.text);
+    setSettingFormShip(ship.shipName);
     setSettingFormArea(area);
   };
+
+
+  // 全てのエリアがチェック完了したかをチェック
+  useEffect(() => {
+    if(!currentARR || !ship.areaBtn || ship.areaBtn.length === 0) {
+      return;
+    }
+    const allCompleted = ship.areaBtn.every(area => {
+      let status = areaCheckStatus[currentARR]?.[ship.shipName]?.[area];
+      const remaining = status ? status.total - status.checked : null;
+      if(status && status.total >0) {
+        return remaining === 0;
+      }
+      return true;
+    });
+      setCompletedARRs(prevARRs => {
+        const isAlreadyCompleted = prevARRs.includes(currentARR);
+        if(allCompleted && !isAlreadyCompleted) {
+          // 全て完了しており、まだ配列に含まれていない場合
+          console.log(`ARR ${currentARR} が完了しました。`);
+          return [...prevARRs, currentARR];
+        } 
+        if(!allCompleted && isAlreadyCompleted) {
+          // 完了状態が解除された場合（チェックが外れたなど）
+          console.log(`ARR ${currentARR} の完了状態が解除されました。`);
+          return prevARRs.filter(arr => arr !== currentARR); //配列から削除
+        }
+        return prevARRs; // 何もしない
+      });
+  },[ship.areaBtn, ship.shipName, currentARR, checkedItems, areaCheckStatus])
+                                            
+
+
   
   // レイアウト設定
 
@@ -141,16 +194,63 @@ const CheckListLayout = ({
         <ArrowBackIosIcon style={{fontSize: "25px", color: blue[300]}}/>
       </IconButton>
       </NavLink>
+      {isSetting? null :
+      <Typography
+        variant="h4" 
+        noWrap 
+        component="div" 
+        fontWeight="fontWeightBold"
+        sx={{
+          color: grey[50],
+          pl:1, pr:1, pt:1,
+        }}
+      >
+        {ship.ARR}/{ship.DEP}
+      </Typography>
+      }
+
+      {isSetting?
       <Typography 
         variant="h4" 
         noWrap 
         component="div" 
         fontWeight="fontWeightBold"
-        sx={{color: isSetting ? yellow[300] : grey[100]}}
+        sx={{
+          color: isSetting ? yellow[300] : grey[200], 
+        }}
       >
-        {isSetting ? "設定モード　" : null}
-        {ship.text}
+        {ship.shipName}
       </Typography>
+      :
+      <Typography 
+        variant="h4" 
+        noWrap 
+        component="div" 
+        // fontWeight="fontWeightBold"
+        sx={{
+          color: isSetting ? yellow[300] : grey[200], 
+          ml:1.5, pl:1, pt:1,
+        }}
+      >
+        {ship.shipName}
+      </Typography>
+      }
+
+      {isSetting? null :
+        <Typography
+        variant="h4" 
+        noWrap 
+        component="div" 
+        // fontWeight="fontWeightBold"
+        sx={{
+          color: grey[200], 
+          ml:0.5,pr:1, pt:1,
+        }}
+        >
+        【{ship.shipNo}】
+      </Typography>
+      }
+ 
       <Typography
         variant="h6"
         noWrap
@@ -181,9 +281,13 @@ const CheckListLayout = ({
         >
           <List>
             { ship.areaBtn.map((area, index) => {
-              const status = areaCheckStatus[ship.text]?.[area];
+              let status = null
+              if(currentARR ) {
+                status = areaCheckStatus[currentARR]?.[ship.shipName]?.[area];
+              }
               const remaining = status ? status.total - status.checked : 0;
               const total = status ? status.total : 0;
+              console.log("remaining: ",remaining,"total: ",total)
               return (
               <NavLink
                 key={index}
@@ -216,6 +320,7 @@ const CheckListLayout = ({
                        </Typography>
                       }
                       secondary={
+                        !isSetting && (
                         <Typography
                           sx={{
                             fontsize: 25,
@@ -223,12 +328,13 @@ const CheckListLayout = ({
                             fontWeight: 'bold'
                           }}
                         >
-                          { remaining === 0 ? 
+                          {remaining === 0 ? 
                            <Box component="span" sx={{ color: '#1de9b6' }}>　完了</Box> 
                            : `残り: ${remaining} / ${total}`
                           }
+                        
                         </Typography>
-                      }
+                       )}
                         
                     />   
                   </ListItemButton>
@@ -289,35 +395,43 @@ const CheckListLayout = ({
             </Typography>
           </Box> 
             <CheckboxList
-            areaPosition = {areaPosition}
-            currentListItems = {currentListItems}
-            isSetting = {isSetting}
-            isAdd={isAdd}
-            isDelete={isDelete}
-            isEdit={isEdit}
-            open={open}
-            setOpen={setOpen}
-            ship={ship.text}
-            selectArea={ship.areaBtn}
-            areaName={areaName}
-            onSaveAddPosition={onSaveAddPosition}
-            setSettingFormShip={setSettingFormShip}
-            setSettingFormArea={setSettingFormArea}
-            setSettingFormPosition={setSettingFormPosition}
-            onSaveAddItem={onSaveAddItem}
-            setOldPosition={setOldPosition}
-            setOldArea={setOldArea}
-            oldArea={oldArea} 
-            OnUpdatePosition={OnUpdatePosition}
-            OnUpdateItem={OnUpdateItem}
-            setTargetItemId={setTargetItemId}
-            OnDeleteItem={OnDeleteItem}
-            OnDeletePosition={OnDeletePosition}            
-            setTargetShipToDelete={setTargetShipToDelete}
-            setTargetAreaToDelete={setTargetAreaToDelete}
-            setTargetPositionToDelete={setTargetPositionToDelete}
-            checkedItems={checkedItems}
-            onToggleItem={onToggleItem}                  
+              areaPosition = {areaPosition}
+              currentListItems = {currentListItems}
+              isSetting = {isSetting}
+              isAdd={isAdd}
+              isDelete={isDelete}
+              isEdit={isEdit}
+              open={open}
+              setOpen={setOpen}
+              ship={ship.shipName}
+              selectArea={ship.areaBtn}
+              areaName={areaName}
+              onSaveAddPosition={onSaveAddPosition}
+              setSettingFormShip={setSettingFormShip}
+              setSettingFormArea={setSettingFormArea}
+              setSettingFormPosition={setSettingFormPosition}
+              onSaveAddItem={onSaveAddItem}
+              setOldPosition={setOldPosition}
+              setOldArea={setOldArea}
+              oldArea={oldArea} 
+              OnUpdatePosition={OnUpdatePosition}
+              OnUpdateItem={OnUpdateItem}
+              setTargetItemId={setTargetItemId}
+              OnDeleteItem={OnDeleteItem}
+              OnDeletePosition={OnDeletePosition}            
+              setTargetShipToDelete={setTargetShipToDelete}
+              setTargetAreaToDelete={setTargetAreaToDelete}
+              setTargetPositionToDelete={setTargetPositionToDelete}
+              checkedItems={checkedItems}
+              onToggleItem={onToggleItem}
+              currentARR={currentARR}
+              setCurrentARR={setCurrentARR}
+              arr={currentARR || ''}
+              ARR={ship.ARR}
+              DEP={ship.DEP}
+              shipNo={ship.shipNo}
+              transferRecordDatas={transferRecordDatas} 
+              setTransferRecordDatas={setTransferRecordDatas}                    
             />      
         </Box>  
         ))

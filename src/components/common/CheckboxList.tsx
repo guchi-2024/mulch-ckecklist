@@ -9,11 +9,12 @@ import IconButton from '@mui/material/IconButton';
 import CommentIcon from '@mui/icons-material/Comment';
 import { grey, yellow } from '@mui/material/colors';
 import { Box, Button, Typography } from '@mui/material';
-import { ListItems } from '../../types';
+import { ListItems, TransferRecord } from '../../types';
 import EditIcon from '@mui/icons-material/Edit';
 import SettingFormS from './settingFormS';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import { addItemSchemaTs, addPositionSchemaTs, editItemSchemaTs, editPositionSchemaTs } from '../../validations/schema';
 import SettingFormL from './settingFormL';
 import SettingFormM from './settingFormM';
@@ -21,6 +22,7 @@ import { positions } from '@material-ui/system';
 import SettingFormLL from './settingFormLL';
 import DeleteFormItem from './deleteFormItem';
 import DeleteFormPosition from './deleteFormPosition';
+import Transfer from '../transfer';
 
 
 interface CheckboxListProps {
@@ -51,8 +53,16 @@ interface CheckboxListProps {
   setTargetShipToDelete: React.Dispatch<React.SetStateAction<string | null>>;
   setTargetAreaToDelete: React.Dispatch<React.SetStateAction<string | null>>;
   setTargetPositionToDelete: React.Dispatch<React.SetStateAction<string | null>>; 
-  checkedItems: string[]; 
-  onToggleItem: (itemId: string) => void;  
+  checkedItems: { [arr: string]: string[] }
+  onToggleItem: (itemId: string, arr: string) => void;
+  currentARR: string | null;
+  setCurrentARR: React.Dispatch<React.SetStateAction<string | null>>
+  arr: string;
+  ARR: string | undefined;
+  DEP: string | undefined;
+  shipNo: string | undefined;
+  transferRecordDatas: TransferRecord[];
+  setTransferRecordDatas: React.Dispatch<React.SetStateAction<TransferRecord[]>>;
 }
 
 // MUI List/List Control を参照
@@ -85,7 +95,16 @@ const CheckboxList = ({
   setTargetAreaToDelete,
   setTargetPositionToDelete,
   checkedItems,
-  onToggleItem,    
+  onToggleItem,
+  currentARR,
+  setCurrentARR,
+  arr,
+  ARR,
+  DEP,
+  shipNo,
+  transferRecordDatas,
+  setTransferRecordDatas,
+     
 } : CheckboxListProps) => {
 
   const [checked, setChecked] = React.useState<string[]>([]);
@@ -97,6 +116,9 @@ const CheckboxList = ({
   const [currentItemToEdit, setCurrentItemToEdit ] = React.useState<ListItems | null> (null);
   const [openDeleteItemForm, setOpenDeleteItemForm] = React.useState(false);
   const [openDeletePositionForm, setOpenDeletePositionForm] = React.useState(false);
+  const [openTransferForm, setOpenTransferForm] = React.useState(false);
+  
+
 
   // aera別にpositionを抽出(CheckboxList生成用) *********************************************
 
@@ -132,18 +154,7 @@ const CheckboxList = ({
   
   // アイテムのチェックを実行
   const handleToggle = (id: string) => () => {
-    // const currentIndex = checked.indexOf(id);
-    // const newChecked = [...checked];
-    // console.log("currentIndex:", currentIndex);
-    // if (currentIndex === -1) {
-    //   newChecked.push(id);
-    // } else {
-    //   newChecked.splice(currentIndex, 1);
-    // }
-    
-    // console.log("newChecked:", newChecked)
-    // setChecked(newChecked);
-    onToggleItem(id);
+    onToggleItem(id, arr);
   };
 
   
@@ -191,6 +202,11 @@ const CheckboxList = ({
     setPositionName(position);      
   }
 
+  const transferFormOpen = (item: ListItems) => {
+    setOpenTransferForm(true);
+    setCurrentItemToEdit(item);
+  }
+
   // SettingFormMの選択肢を作成  ***************************************************
   // (Gemini: MUI Select コンポーネントの作成を参照)
 
@@ -234,12 +250,7 @@ const CheckboxList = ({
   },[currentListItems, selectArea])
 
   console.log("selectPositionByArea:", selectPositionByArea)
-
-
-
-  // SettingFormLLの選択肢を作成 ************************************************
- 
-    
+  
 
   return (
     <>
@@ -250,7 +261,10 @@ const CheckboxList = ({
         <Box
           display={'flex'} 
           key={position}
-          sx={{color: isSetting ? yellow[300] : grey[100], mt:3}} 
+          sx={{
+            color: isSetting ? yellow[300] : grey[100],
+            mt:3
+          }} 
         >
          {isAdd ? (
            <IconButton 
@@ -303,13 +317,15 @@ const CheckboxList = ({
             oldArea={oldArea} 
             OnUpdatePosition={OnUpdatePosition}  
             />
-         )}        
+         )}                 
         </Box>  
         
       <List sx={{ 
         width: '100%', 
         maxWidth: 800, 
-        bgcolor: isSetting ? yellow[50] : 'background.paper' 
+        bgcolor: isSetting ? yellow[50] : 'background.paper',
+        borderRadius: '5px',
+        border: '3px solid #607d8b',  
       }}>
       {filteredItemsForCurrentArea
        .filter((item) => item.position === position)
@@ -319,12 +335,25 @@ const CheckboxList = ({
         return (
           <ListItem
           key={item.id}
+          secondaryAction={
+            <IconButton
+              sx={{
+                color: '#00b0ff',
+                '& .MuiSvgIcon-root': {
+                  fontSize: '2.5rem', 
+                },
+              }}
+          onClick={() => transferFormOpen(item)}    
+            >
+              <EditNoteIcon />
+            </IconButton>
+          }
+          disablePadding
           // secondaryAction={
             //   <IconButton edge="end" aria-label="comments">
             //     <CommentIcon />
             //   </IconButton>
             // }
-            disablePadding
             >
             <ListItemButton role={undefined} onClick={handleToggle(item.id)} dense>
               {isDelete ? (
@@ -351,19 +380,36 @@ const CheckboxList = ({
                 <ListItemIcon>
                    <Checkbox
                      edge="start"
-                     checked={checkedItems.includes(item.id)}
+                     checked={checkedItems[arr]?.includes(item.id) || false}
                      tabIndex={-1}
                      disableRipple
                      inputProps={{ 'aria-labelledby': labelId }}
+                     sx={{
+                      '& .MuiSvgIcon-root': {
+                        fontSize: '2rem', 
+                      },
+                      '&.Mui-checked': {
+                        color: '#00e676', 
+                      },
+                     }}
                      />
                 </ListItemIcon>
               )}
               <ListItemText 
                  id={labelId} 
                  primary={`${item.name}`}
-                 sx={{color: grey[900]}} 
+                 sx={{
+                  color: grey[900],
+                }}
+                slotProps={{
+                  primary: {
+                    sx: {
+                      fontSize: '1.6rem',
+                      fontWeight: 'bold'
+                    }
+                }}}
                  />
-            </ListItemButton>
+            </ListItemButton>            
           </ListItem>
         );
       })}
@@ -422,6 +468,22 @@ const CheckboxList = ({
               OnDeletePosition={OnDeletePosition}
               
             />
+      )}
+
+      { openTransferForm && currentItemToEdit && (
+        <Transfer
+          open={openTransferForm}
+          setOpen={setOpenTransferForm}
+          ship={currentItemToEdit.ship}
+          area={currentItemToEdit.area}
+          position={currentItemToEdit.position}
+          itemName={currentItemToEdit.name}
+          ARR={ARR}
+          DEP={DEP}
+          shipNo={shipNo}
+          transferRecordDatas={transferRecordDatas} 
+          setTransferRecordDatas={setTransferRecordDatas}  
+        />
       )}   
     
     

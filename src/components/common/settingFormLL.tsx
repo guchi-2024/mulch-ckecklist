@@ -199,19 +199,19 @@ export default function SettingFormLL({
                   id="outlined-start-adornment"
                   select
                   sx={{ m: 1, width: '12ch'}}
-                    slotProps={{
-                      input: {
-                        sx: {
+                  slotProps={{
+                    input: {
+                      sx: {
+                        backgroundColor: '#fafafa',
+                        '&:hover': {
                           backgroundColor: '#fafafa',
-                          '&:hover': {
-                            backgroundColor: '#fafafa',
-                          },
-                          '&.Mui-focused': {
-                            backgroundColor: '#fafafa',
-                          }, 
-                        }
+                        },
+                        '&.Mui-focused': {
+                          backgroundColor: '#fafafa',
+                        }, 
                       }
-                    }}
+                    }
+                  }}
                 >
                   {selectArea.map((areaOption, index) => (
                     <MenuItem value={areaOption} key={index}>

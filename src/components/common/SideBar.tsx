@@ -33,7 +33,11 @@ interface SidebarProps {
   setIsDelete: React.Dispatch<React.SetStateAction<boolean>>;
   isEdit: boolean;
   setIsEdit: React.Dispatch<React.SetStateAction<boolean>>;
-  setMobileOpen: React.Dispatch<React.SetStateAction<boolean>>
+  isDefaultEntry: boolean;
+  setIsDefaultEntry: React.Dispatch<React.SetStateAction<boolean>>;
+  setMobileOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isPersonalRecord: boolean;
+  setIsPersonalRecord: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SideBar = (
@@ -49,7 +53,11 @@ const SideBar = (
     setIsDelete,
     isEdit,
     setIsEdit,
+    isDefaultEntry,
+    setIsDefaultEntry,
     setMobileOpen,
+    isPersonalRecord,
+    setIsPersonalRecord,
   }: SidebarProps
 ) => {
 
@@ -63,14 +71,22 @@ const SideBar = (
   const activeLinkStyle = {
     backgroundColor: "rgba(0, 0, 0, 0.08)"
   }
+// ホーム
+  const handleIsHome = () => {
+    setMobileOpen(false);
+    setIsDefaultEntry(false);
+    setIsPersonalRecord(false);
+    setIsSetting(false);
+  }
 
+// リスト編集関連ページ切替
   const handleIsSetting = () => {
     if (isSetting) {
       setIsSetting(false);
-      setIsAdd(false);
-      setIsDelete(false)
     } else {
       setIsSetting(true);
+      setIsDefaultEntry(false);
+      setIsPersonalRecord(false);
     }
   }
 
@@ -106,6 +122,30 @@ const SideBar = (
       setMobileOpen(false); 
     }
   }
+
+// 初期登録関連ページ切替
+  const handleIsDefaultEntry = () => {
+    if(isDefaultEntry) {
+      setIsDefaultEntry(false);
+      setMobileOpen(false);
+    } else {
+      setIsDefaultEntry(true);
+      setIsSetting(false);
+      setMobileOpen(false);
+    }
+  }
+
+// 履歴ページ
+  const handleIsPersonalRecord = () => {
+    if(isPersonalRecord) {
+      setIsPersonalRecord(false);
+    } else {
+      setIsPersonalRecord(true);
+      setIsDefaultEntry(false);
+      setIsSetting(false);
+      setMobileOpen(false);
+    }
+  }
   
 
 // MUI Drower の Toolpad を参照
@@ -113,8 +153,7 @@ const SideBar = (
     <div>
       <Toolbar />
       <Divider />
-      <List>
-        
+      <List>  
           <NavLink
             to="/"
             style={({isActive}) => {
@@ -124,6 +163,29 @@ const SideBar = (
               }
             }}
           >
+            <ListItem
+              disablePadding
+              onClick={handleIsHome}
+            >
+              <ListItemButton
+                sx={{
+                  color: grey[900],
+                  pr: 0
+                }}
+              >
+                <ListItemText
+                  primary="チェックリスト"
+                  slotProps={{
+                    primary: {
+                      sx: { fontSize: "25px"}
+                    }
+                  }}
+                  />
+              </ListItemButton>
+            </ListItem>
+
+            <Divider />
+
             <ListItem 
               disablePadding 
               onClick={handleIsSetting}>          
@@ -134,7 +196,7 @@ const SideBar = (
                 }}
               >
                 <ListItemText
-                  primary="設定"
+                  primary="リスト編集"
                   slotProps={{
                     primary: {
                       sx: { fontSize: "25px"}
@@ -152,9 +214,7 @@ const SideBar = (
                 </ListItemIcon>    
               </ListItemButton>
             </ListItem>
-          </NavLink>
-
-         <Collapse in={isSetting} timeout="auto" unmountOnExit>
+            <Collapse in={isSetting} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               <SubSettingButton
                 baseLinkStyle={baseLinkStyle}
@@ -182,7 +242,54 @@ const SideBar = (
               />
                   
             </List>
-          </Collapse>
+          </Collapse>            
+            <Divider />
+            <ListItem
+              disablePadding
+              onClick={handleIsDefaultEntry}
+            >
+              <ListItemButton
+                sx={{
+                  color: grey[900],
+                  pr: 0
+                }}
+              >
+                <ListItemText
+                  primary="初期登録"
+                  slotProps={{
+                    primary: {
+                      sx: { fontSize: "25px"}
+                    }
+                  }}
+                  />
+              </ListItemButton>
+            </ListItem>
+
+            <Divider />
+
+            <ListItem
+              disablePadding
+              onClick={handleIsPersonalRecord}
+            >
+              <ListItemButton
+                sx={{
+                  color: isPersonalRecord ? yellow[700] : grey[900],
+                  pr: 0
+                }}
+              >
+                <ListItemText
+                  primary="履歴"
+                  slotProps={{
+                    primary: {
+                      sx: { fontSize: "25px"}
+                    }
+                  }}
+                  />
+              </ListItemButton>
+            </ListItem>
+          </NavLink>
+
+
               
       </List>
       

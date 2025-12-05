@@ -190,8 +190,8 @@ export default function SettingFormL({
             render={({field}) => (
               <TextField
                 {...field}
-                error={!!errors.item}
-                helperText={errors.item?.message}
+                error={!!errors.number}
+                helperText={errors.number?.message}
                 label="個数"
                 id="outlined-start-adornment"
                 sx={{ m: 1, width: '10ch'}}
@@ -226,8 +226,8 @@ export default function SettingFormL({
               render={({field}) => (
                 <TextField
                   {...field}
-                  error={!!errors.item}
-                  helperText={errors.item?.message}
+                  error={!!errors.startDate}
+                  helperText={errors.startDate?.message}
                   label="搭載開始"
                   id="outlined-start-adornment"
                   sx={{ m: 1, width: '13ch'}}
@@ -262,8 +262,8 @@ export default function SettingFormL({
               render={({field}) => (
                 <TextField
                   {...field}
-                  error={!!errors.item}
-                  helperText={errors.item?.message}
+                  error={!!errors.startDate}
+                  helperText={errors.startDate?.message}
                   label="搭載終了"
                   id="outlined-start-adornment"
                   sx={{ m: 1, width: '13ch'}}

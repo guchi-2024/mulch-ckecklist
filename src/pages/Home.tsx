@@ -1,8 +1,9 @@
 
-import { red, yellow, grey} from '@mui/material/colors';
+import { red, yellow, grey, blue} from '@mui/material/colors';
 import { Box, List, ListItemButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { MenuItem } from '../types';
+import { MenuList } from '../types';
+import { useState } from 'react';
 
 interface HomeProps {
   isSetting: boolean;
@@ -10,32 +11,42 @@ interface HomeProps {
 
 export default function Home({isSetting}: HomeProps) {
 
-  const navigate = useNavigate();
+  const[openForm, setOpenForm] = useState(false);
 
-  const menuItems: MenuItem[] = [
-    { text: "A350", 
+  const shipNavigate = useNavigate();
+
+  const menuList: MenuList[] = [
+    { shipName: "A350", 
       path:"/CheckListLayout/A350",
-      areaBtn: [ "FWD", "MID", "AFT"] 
+      areaBtn: [ "FWD", "MID", "AFT"],
+      ARR: "SETTING",
+      DEP: "",
+      shipNo: "",
     },
-    { text: "E170", 
+    { shipName: "E170", 
       path:"/CheckListLayout/E170",
-      areaBtn: [ "FWD", "AFT"] 
+      areaBtn: [ "FWD", "AFT"],
+      ARR: "SETTING",
+      DEP: "",
+      shipNo: "", 
     },
-    { text: "ATR", 
+    { shipName: "ATR", 
       path:"/CheckListLayout/ATR",
-      areaBtn: [ "ALL" ] 
+      areaBtn: [ "ALL" ],
+      ARR: "SETTING",
+      DEP: "",
+      shipNo: "", 
     },
   ];
 
-  const handleLinkClick = (ship: MenuItem) => {
-    navigate(ship.path, {state: ship})
+  const handleLinkClick = (ship: MenuList) => {
+    shipNavigate(ship.path, {state: ship})
   }
 
   const selectShip = (
     <div>
-
       <List>
-        { menuItems.map((ship, index) => (
+        { menuList.map((ship, index) => (
           <div
             key={index} 
             onClick={() => handleLinkClick(ship)}
@@ -49,18 +60,20 @@ export default function Home({isSetting}: HomeProps) {
                 "&:hover": {bgcolor: isSetting? yellow[600] : red[500]},
                 height: 50,
                 width: 200,
-                borderRadius: "3%",
+                borderRadius: "4px",
+                border: '2px solid #ffb300',
                 m: 3,
                 ml: 5
               }}
             >
-              {ship.text}
+              {ship.shipName}
             </ListItemButton>
           </div>
         ))}
       </List>
     </div>
-  )    
+  )
+
   return (
     <Box>
       {selectShip}

@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import SideBar from '../common/SideBar';
 import { blue, grey, yellow} from '@mui/material/colors';
 
@@ -22,6 +22,11 @@ interface AppLayoutProps {
   isEdit: boolean;
   setIsEdit: React.Dispatch<React.SetStateAction<boolean>>;
   currentDateTimeFormatted: string;
+  isDefaultEntry: boolean;
+  setIsDefaultEntry: React.Dispatch<React.SetStateAction<boolean>>;
+  isPersonalRecord: boolean;
+  setIsPersonalRecord: React.Dispatch<React.SetStateAction<boolean>>;
+  
 }
 
 export default function AppLayout({
@@ -33,7 +38,12 @@ export default function AppLayout({
   setIsDelete,
   isEdit,
   setIsEdit,
+  isDefaultEntry,
+  setIsDefaultEntry,
   currentDateTimeFormatted,
+  isPersonalRecord,
+  setIsPersonalRecord,
+  
 }: AppLayoutProps) {
 
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -46,6 +56,7 @@ export default function AppLayout({
 
   const handleDrawerTransitionEnd = () => {
     setIsClosing(false);
+
   };
 
   const handleDrawerToggle = () => {
@@ -53,6 +64,14 @@ export default function AppLayout({
       setMobileOpen(!mobileOpen);
     }
   };
+
+  // personalRecordへのページ遷移
+  const natigate = useNavigate();
+  React.useEffect(() => {
+    if(isPersonalRecord) {
+      natigate("/PersonalRecord");
+    }
+  }, [isPersonalRecord, natigate])
 
 
 
@@ -90,9 +109,15 @@ export default function AppLayout({
             noWrap 
             component="div" 
             fontWeight="fontWeightBold"
-            sx={{color: isSetting ? yellow[300] : grey[100]}}
+            sx={{color: isSetting || isDefaultEntry ? yellow[300] : grey[100]}}
           >
-            {isSetting ?  "設定モード": "チェックリスト" }
+            {isSetting 
+              ?"編集モード"
+              : isDefaultEntry 
+              ?"初期登録"
+              : isPersonalRecord 
+              ?"履歴"
+              :"チェックリスト" }
           </Typography>
           <Typography
             variant="h6"
@@ -110,15 +135,20 @@ export default function AppLayout({
         mobileOpen = {mobileOpen}
         handleDrawerClose = {handleDrawerClose}
         handleDrawerTransitionEnd = {handleDrawerTransitionEnd}
-        setIsSetting = {setIsSetting}
         isSetting = {isSetting}
+        setIsSetting = {setIsSetting}
         isAdd={isAdd}
         setIsAdd={setIsAdd}
         isDelete={isDelete}
         setIsDelete={setIsDelete}
         isEdit={isEdit}
         setIsEdit={setIsEdit}
+        isDefaultEntry={isDefaultEntry}
+        setIsDefaultEntry={setIsDefaultEntry}
         setMobileOpen={setMobileOpen}
+        isPersonalRecord={isPersonalRecord}
+        setIsPersonalRecord={setIsPersonalRecord}
+        
       />
       {/* メインコンテンツ */}
       <Box

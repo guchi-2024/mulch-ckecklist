@@ -57,3 +57,23 @@ export const editItemSchema = z.object({
 })
 export type editItemSchemaTs = z.infer<typeof editItemSchema> 
 
+
+
+// FlightListScema
+export const BaseFlightScema = z.object({
+  company: z.string(),
+  ARR: z.string().min(1, { message: "ARRは必須です" }),
+  DEP: z.string(),
+  ship: z.string().min(1, { message: "ship typeを選択してください" }),
+  shipNo: z.string(),
+  id: z.string().optional(),
+
+});
+
+export type BaseFlightScemaTs = z.infer<typeof BaseFlightScema>;
+
+export const flightListScema = BaseFlightScema.extend({
+  // FlightインターフェースのNo?: numberに合わせてオプショナルにする
+  No: z.number().optional(), 
+});
+export type flightListScemaTs = z.infer<typeof flightListScema>
